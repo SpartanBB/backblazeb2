@@ -100,7 +100,7 @@ def usage_demo():
             print(f"curl -XPUT '{url}' -T {filename} -H \"X-Bz-Content-Sha1: $(sha1sum {filename} |cut -d' '  -f1)\"")
         else:
             print("To download the file you can use")
-            print(f"curl -XPUT '{url}' -T {filename} -H \"X-Bz-Content-Sha1: $(sha1sum {filename} |cut -d' '  -f1)\"")
+            print(f"curl '{url}' -o {filename}")
     else:
         print("Got response:")
         print(f"Status: {response.status_code}")
