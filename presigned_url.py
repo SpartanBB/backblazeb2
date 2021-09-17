@@ -27,9 +27,11 @@ try:
     logger.debug('Getting s3ApiUrl value')
     environ_endpoint_url = environ.get('s3ApiUrl',
                                        f"https://s3.{region}.backblazeb2.com").split('.')
-    if len(environ_endpoint_url) == 4 and environ_endpoint_url[0] == 'https://s3' and environ_endpoint_url[2] == 'backblazeb2' and environ_endpoint_url[2] == 'com':
-        region_split = environ_endpoint_url[1].split('-')
-        if len(region_split) == 3 and region_split[0] in ['us', 'eu'] and region_split[1] in ['east', 'west', 'central'] and int(region_split):
+    if len(environ_endpoint_url) == 4 and environ_endpoint_url[0] == "https://s3" and environ_endpoint_url[2] == "backblazeb2" and environ_endpoint_url[2] == "com":
+        # Uncomment in case more regions get supported or want loose s3ApiUrl validation
+        # region_split = environ_endpoint_url[1].split('-')
+        # if len(region_split) == 3 and region_split[0] in ['us', 'eu'] and region_split[1] in ['east', 'west', 'central'] and int(region_split):
+        if environ_endpoint_url[1] in ["us-west-000", "us-west-001", "us-west-002", "eu-central-003"]:
             endpoint_url = '.'.join(environ_endpoint_url)
     logger.debug(f"Using the s3ApiUrl {endpoint_url}.")
 except:
