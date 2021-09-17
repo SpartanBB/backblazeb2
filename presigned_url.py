@@ -13,10 +13,24 @@ import logging
 import boto3
 from botocore.exceptions import ClientError
 import requests
+from os import environ
 
 logger = logging.getLogger(__name__)
 region = "us-west-002"
 endpoint_url = f"https://s3.{region}.backblazeb2.com"
+
+# To know your s3 API Url and region you can use the b2_authorize_account Backblaze API.
+# https://www.backblaze.com/b2/docs/b2_authorize_account.html
+# export s3ApiUrl=$(curl -s https://api.backblazeb2.com/b2api/v2/b2_authorize_account -u "APPLICATION_KEY_ID:APPLICATION_KEY" |jq -r '.s3ApiUrl')
+try:
+    environ_endpoint_url = environ.get('s3ApiUrl',
+                                       f"https://s3.{region}.backblazeb2.com").split('.')
+    if len(environ_endpoint_url) == 4 and environ_endpoint_url[0] == 'https://s3' and environ_endpoint_url[2] == 'backblazeb2' and environ_endpoint_url[2] == 'com':
+        region_split = environ_endpoint_url[1].split('-')
+        if len(region_split) == 3 and region_split[0] in ['us', 'eu'] and region_split[1] in ['east', 'west', 'central'] and int(region_split):
+            endpoint_url = '.'.join(environ_endpoint_url)
+except:
+    logger.error(f'Bad s3ApiUrl value, using {endpoint_url}')
 
 
 def generate_presigned_url(s3_client, client_method, method_parameters, expires_in):
@@ -77,9 +91,12 @@ def usage_demo():
 
     if 'dry' in args.action:
         print(f"The presigned URL is: {url}")
+        filename = args.key
         if args.action == 'dryput':
             print("To upload the file you can use")
-            filename = args.key
+            print(f"curl -XPUT '{url}' -T {filename} -H \"X-Bz-Content-Sha1: $(sha1sum {filename} |cut -d' '  -f1)\"")
+        else:
+            print("To download the file you can use")
             print(f"curl -XPUT '{url}' -T {filename} -H \"X-Bz-Content-Sha1: $(sha1sum {filename} |cut -d' '  -f1)\"")
     else:
         print("Got response:")
