@@ -15,6 +15,7 @@ from botocore.exceptions import ClientError
 import requests
 from os import environ
 
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 region = "us-west-002"
 endpoint_url = f"https://s3.{region}.backblazeb2.com"
@@ -23,12 +24,14 @@ endpoint_url = f"https://s3.{region}.backblazeb2.com"
 # https://www.backblaze.com/b2/docs/b2_authorize_account.html
 # export s3ApiUrl=$(curl -s https://api.backblazeb2.com/b2api/v2/b2_authorize_account -u "APPLICATION_KEY_ID:APPLICATION_KEY" |jq -r '.s3ApiUrl')
 try:
+    logger.debug('Getting s3ApiUrl value')
     environ_endpoint_url = environ.get('s3ApiUrl',
                                        f"https://s3.{region}.backblazeb2.com").split('.')
     if len(environ_endpoint_url) == 4 and environ_endpoint_url[0] == 'https://s3' and environ_endpoint_url[2] == 'backblazeb2' and environ_endpoint_url[2] == 'com':
         region_split = environ_endpoint_url[1].split('-')
         if len(region_split) == 3 and region_split[0] in ['us', 'eu'] and region_split[1] in ['east', 'west', 'central'] and int(region_split):
             endpoint_url = '.'.join(environ_endpoint_url)
+    logger.debug(f"Using the s3ApiUrl {endpoint_url}.")
 except:
     logger.error(f'Bad s3ApiUrl value, using {endpoint_url}')
 
@@ -58,8 +61,6 @@ def generate_presigned_url(s3_client, client_method, method_parameters, expires_
 
 
 def usage_demo():
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-
     print('-'*88)
     print("Welcome to the Amazon S3 presigned URL demo.")
     print('-'*88)
